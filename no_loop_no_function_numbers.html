@@ -1,0 +1,88 @@
+<textarea id="editor" style="width:100%;height:200px;background-color: black; color: lime;">
+# write code to print out the numbers from 0-9 without using a loop or function
+def no_loop_no_function_numbers():
+    # Your code here
+    print()
+# Test case don't type below this
+run_selected_test()
+</textarea>
+
+<button onclick="runCode()" style="margin-top:10px;">Run Unit Tests</button>
+
+<textarea id="output" style="width:100%;height:150px;border:1px solid #ccc;overflow-y:auto;padding:10px;margin-top:10px;background-color: black; color: lime;">
+    Output or flag will appear here...
+</textarea>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.22.1/full/pyodide.js"></script>
+<script>
+    async function runCode() {
+        const editor = document.getElementById("editor").value;
+        const output = document.getElementById("output");
+        if (editor.includes("import os") || editor.includes("import shutil")) {
+            output.innerHTML = "ERROR: Usage of 'import os' and 'import shutil' are not allowed";
+            return;
+        }
+
+        output.innerHTML = "Running...";
+
+        try {
+            // Load Pyodide and initialize it
+            const pyodide = await loadPyodide();
+
+            // Preload the test infrastructure
+            pyodide.runPython(`
+import sys
+import dis
+import unittest
+from io import StringIO
+from unittest.mock import patch
+
+sys.stdout = StringIO()
+sys.stderr = StringIO()
+
+def run_selected_test():
+    class TestPyNight(unittest.TestCase):
+        @patch('sys.stdout', new_callable=StringIO)
+        def test_no_loop_no_function_numbers(self, mock_stdout):
+            """Test if the function uses a loop or function call."""
+            bytecode = dis.Bytecode(no_loop_no_function_numbers)
+            contains_loop = any(instr.opname in {"SETUP_LOOP", "FOR_ITER",
+                                                "GET_ITER"} for instr in bytecode)
+            self.assertFalse(contains_loop, "The function uses a loop.")
+            function_calls = [instr.argval for instr in bytecode if instr.opname == "LOAD_GLOBAL"]
+            function_calls.remove("print")
+            self.assertEqual(len(function_calls), 0, "Function calls detected in the function.")
+            mock_stdout.truncate(0)
+            mock_stdout.seek(0)
+            no_loop_no_function_numbers()
+            valid_outputs = {"0 1 2 3 4 5 6 7 8 9", "0123456789", "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+                "0,1,2,3,4,5,6,7,8,9", "[0,1,2,3,4,5,6,7,8,9]", "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"}
+            self.assertIn(mock_stdout.getvalue().strip(), valid_outputs)
+
+    # Run the tests
+    suite = unittest.TestSuite()
+    suite.addTest(TestPyNight("test_no_loop_no_function_numbers"))
+    success_message = "Correct the flag is: CTF{no loops AND no functions}"
+    runner = unittest.TextTestRunner(resultclass=CustomTestResult)
+    result = runner.run(suite)
+    if result.wasSuccessful():
+        print(success_message)
+class CustomTestResult(unittest.TextTestResult):
+    def addSuccess(self, test):
+        pass
+`);
+
+            // Execute the user's Python code
+            pyodide.runPython(editor);
+
+            // Retrieve the results
+            const stdout = pyodide.runPython("sys.stdout.getvalue()");
+            const stderr = pyodide.runPython("sys.stderr.getvalue()");
+
+            // Display results
+            output.innerHTML = stdout || stderr || "No output.";
+        } catch (error) {
+            output.innerHTML = `Error: ${error}`;
+        }
+    }
+</script>
