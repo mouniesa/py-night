@@ -290,7 +290,7 @@
 
     const chosen = optionsMeta[selectedIndex];
 
-    if (chosen.isCorrect) {
+    if (chosen.isCorrect & currentQuestionIndex < questions.length) {
       feedbackEl.textContent = "Correct! Moving to the next question...";
       feedbackEl.className = "correct";
       feedbackEl.style.display = "block";
@@ -301,7 +301,7 @@
         feedbackEl.style.display = "none";
         nextQuestion();
       }, 1000);
-    } else {
+    } else if (attemptsLeft > 0 & currentQuestionIndex < questions.length){
       attemptsLeft--;
       feedbackEl.textContent = chosen.feedback || "Incorrect answer.";
       feedbackEl.className = "incorrect";
