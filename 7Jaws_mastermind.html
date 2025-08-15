@@ -1,27 +1,82 @@
-Challenge: The shark tracker is protected by a MasterMind-style code lock.
-The secret code is a sequence of 4 digits (0-9). You have to break it by writing
-a Python script that guesses the code automatically. If we don't find the correct
-code within 5000 tries we'll be locked out.
-<p>
-Rules:
-<ul>
-    <li>After each guess, the system returns a history of:</li>
-    <ul>
-        <li>last guess</li>
-        <li>Correct positions: number of digits guessed exactly.</li>
-        <li>Correct digits (wrong position): number of correct digits in wrong place.</li>
-        <li>Example history: [([0,0,0,0], (2,0)), ([0,0,1,1], (3,0)), ([0,0,1,6], (3,0))]</li>
-    </ul>
-    <li>Keep guessing until you crack the code.</li>
-</ul>
-</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Jaws — MasterMind Lock</title>
+<style>
+  :root{ --ocean1:#001d3d; --ocean2:#003566; --foam:#cfe8ff; --blood:#b30000; --ink:#0f0; }
+  body{
+    margin:0; color:#fff;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+    background:
+      radial-gradient(80vw 40vh at 50% -10%, var(--foam), transparent 60%),
+      linear-gradient(180deg, var(--ocean1), var(--ocean2) 60%, #000 100%);
+    min-height:100vh; padding:24px;
+  }
+  header{ display:flex; gap:16px; align-items:center; margin-bottom:16px; }
+  .fin{ width:64px; height:64px; }
+  .title{ font-weight:900; letter-spacing:.03em; line-height:1.1; text-transform:uppercase; font-size:clamp(20px,4vw,36px); }
+  .title span{ color:var(--blood); }
+  .sub{ opacity:.9; margin-top:4px; font-size:14px }
+  .card{
+    background:rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.18); border-radius:14px;
+    padding:16px; backdrop-filter: blur(4px); box-shadow:0 10px 30px rgba(0,0,0,.4); margin-bottom:16px;
+  }
+  .challenge strong{ color:var(--blood); }
+  .task ol{ margin:8px 0 0 20px; }
+  #editor,#output{
+    width:100%; background:#000; color:var(--ink); border-radius:10px; border:1px solid #2a2a2a;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+  }
+  #editor{ height:700px; padding:10px; }
+  #output{ height:100px; padding:10px; overflow-y:auto; }
+  button{
+    margin-top:10px; padding:10px 14px; border-radius:10px; border:1px solid #2a2a2a;
+    background:linear-gradient(180deg,#222,#111); color:#fff; cursor:pointer;
+  }
+  button:hover{ transform: translateY(-1px); }
+  .stamp{
+    display:inline-block; margin-top:6px; padding:4px 8px; border:1px dashed #ffcab3;
+    color:#ffcab3; border-radius:8px; font-size:12px; letter-spacing:.04em;
+  }
+</style>
+</head>
+<body>
 
-Task:
-<ol>
-    <li>Write Python code that plays MasterMind until it finds the code.</li>
-    <li>Enter the correct code when prompted.</li>
-</ol>
-<textarea id="editor" style="width:100%;height:700px;background-color: black; color: lime;">
+<header>
+  <!-- Shark fin SVG -->
+  <svg class="fin" viewBox="0 0 64 64" aria-hidden="true">
+    <defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#2b2b2b"/><stop offset="1" stop-color="#0a0a0a"/>
+    </linearGradient></defs>
+    <path d="M6 50 C 10 35, 25 18, 40 8 C 46 27, 51 39, 58 50 Z" fill="url(#g)" stroke="#111" stroke-width="1.5"/>
+    <rect x="4" y="50" width="56" height="6" fill="#0b2744"/>
+  </svg>
+  <div>
+    <div class="title"><span>Amity</span> Island — Code Lock</div>
+    <div class="sub">“We're gonna need a bigger boat.”</div>
+  </div>
+</header>
+
+<div class="card challenge">
+  <strong>Challenge:</strong> The shark tracker is protected by a MasterMind-style code lock. The secret code is a sequence of 4 digits (0–9). Break it before 5000 tries… or we’re locked out.
+  <div class="stamp">Harbor Control • Secure Access</div>
+</div>
+
+<div class="card task">
+  <strong>Rules & Task:</strong>
+  <ul>
+    <li>After each guess, you receive a history of <em>(guess, (correct positions, correct digits wrong place))</em>.</li>
+    <li>Example history: <code>[([0,0,0,0], (2,0)), ([0,0,1,1], (3,0)), ([0,0,1,6], (3,0))]</code></li>
+  </ul>
+  <ol>
+    <li>Write <code>mastermind_guesser(history)</code> that returns your next 4-digit guess as a list.</li>
+    <li>Keep guesses consistent with the feedback in <code>history</code>.</li>
+  </ol>
+</div>
+
+<textarea id="editor">
 def mastermind_guesser(history):
     guess = [0,0,0,0]
     #your code here
@@ -31,30 +86,27 @@ def mastermind_guesser(history):
 run_selected_test()
 </textarea>
 
-<button onclick="runCode()" style="margin-top:10px;">Run Unit Tests</button>
+<button onclick="runCode()">Run Unit Tests</button>
 
-<textarea id="output" style="width:100%;height:100px;border:1px solid #ccc;overflow-y:auto;padding:10px;margin-top:10px;background-color: black; color: lime;">
-    Output or flag will appear here...
-</textarea>
+<textarea id="output">Output or flag will appear here...</textarea>
 
 <script src="https://cdn.jsdelivr.net/pyodide/v0.22.1/full/pyodide.js"></script>
 <script>
-    async function runCode() {
-        const editor = document.getElementById("editor").value;
-        const output = document.getElementById("output");
-        if (editor.includes("import os") || editor.includes("import shutil")) {
-            output.innerHTML = "ERROR: Usage of 'import os' and 'import shutil' are not allowed";
-            return;
-        }
+  async function runCode() {
+    const editor = document.getElementById("editor").value;
+    const output = document.getElementById("output");
+    if (editor.includes("import os") || editor.includes("import shutil")) {
+      output.innerHTML = "ERROR: Usage of 'import os' and 'import shutil' are not allowed";
+      return;
+    }
 
-        output.innerHTML = "Running...";
+    output.innerHTML = "Running...";
 
-        try {
-            // Load Pyodide and initialize it
-            const pyodide = await loadPyodide();
+    try {
+      const pyodide = await loadPyodide();
 
-            // Preload the test infrastructure
-            pyodide.runPython(`
+      // Preload the test infrastructure (unchanged from your spec)
+      pyodide.runPython(`
 import sys
 import unittest
 from io import StringIO
@@ -146,22 +198,24 @@ def run_selected_test():
     result = runner.run(suite)
     if result.wasSuccessful():
         print(success_message)
+
 class CustomTestResult(unittest.TextTestResult):
     def addSuccess(self, test):
         pass
 `);
 
-            // Execute the user's Python code
-            pyodide.runPython(editor);
+      // Run user's code
+      pyodide.runPython(editor);
 
-            // Retrieve the results
-            const stdout = pyodide.runPython("sys.stdout.getvalue()");
-            const stderr = pyodide.runPython("sys.stderr.getvalue()");
-
-            // Display results
-            output.innerHTML = stdout || stderr || "No output.";
-        } catch (error) {
-            output.innerHTML = `Error: ${error}`;
-        }
+      // Output results
+      const stdout = pyodide.runPython("sys.stdout.getvalue()");
+      const stderr = pyodide.runPython("sys.stderr.getvalue()");
+      output.innerHTML = stdout || stderr || "No output.";
+    } catch (error) {
+      output.innerHTML = "Error: " + error;
     }
+  }
 </script>
+
+</body>
+</html>

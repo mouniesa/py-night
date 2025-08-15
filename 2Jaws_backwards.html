@@ -1,65 +1,168 @@
-Challenge: The mayor of Amity Island left a secret warning about the shark attack… but it's written backwards!
-Only by reversing it will you know the passphrase to get off the beach before the shark strikes again.
-<p>
-Task:
-<ol>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>2Jaws_backwards — Amity Beach Evac Order</title>
+<style>
+  :root{
+    --sand:#f5e6c8;
+    --ocean1:#001d3d;
+    --ocean2:#003566;
+    --blood:#b30000;
+    --foam:#cfe8ff;
+    --ink:#0f0;
+  }
+  body{
+    margin:0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji", "Segoe UI Symbol";
+    color:#fff;
+    background:
+      radial-gradient(80vw 40vh at 50% -10%, var(--foam), transparent 60%),
+      linear-gradient(180deg, var(--ocean1), var(--ocean2) 60%, #000 100%);
+    min-height:100vh;
+    padding:24px;
+  }
+  header{
+    display:flex; gap:16px; align-items:center; margin-bottom:10px;
+  }
+  .fin{
+    width:64px; height:64px;
+  }
+  .title{
+    font-weight:900; letter-spacing:.03em; line-height:1.1;
+    text-transform:uppercase;
+    font-size: clamp(20px, 4vw, 36px);
+  }
+  .title span{ color:var(--blood); }
+  .sub{ opacity:.9; margin-top:4px; font-size:14px }
+  .card{
+    background:rgba(0,0,0,.45);
+    border:1px solid rgba(255,255,255,.18);
+    border-radius:14px; padding:16px; backdrop-filter: blur(4px);
+    box-shadow: 0 10px 30px rgba(0,0,0,.4);
+    margin-bottom:16px;
+  }
+  .challenge strong{ color:var(--blood); }
+  .task ol{ margin:8px 0 0 20px; }
+  #editor,#output{
+    width:100%; background:#000; color:var(--ink); border-radius:10px;
+    border:1px solid #2a2a2a; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+  #editor{ height:200px; padding:10px; }
+  #output{ height:150px; padding:10px; overflow-y:auto; }
+  button{
+    margin-top:10px; padding:10px 14px; border-radius:10px; border:1px solid #2a2a2a;
+    background:linear-gradient(180deg,#222,#111); color:#fff; cursor:pointer;
+  }
+  button:hover{ transform: translateY(-1px); }
+  .stamp{
+    display:inline-block; margin-top:6px; padding:4px 8px; border:1px dashed #ffcab3;
+    color:#ffcab3; border-radius:8px; font-size:12px; letter-spacing:.04em;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <!-- Inline SVG shark fin (no external assets) -->
+  <svg class="fin" viewBox="0 0 64 64" aria-hidden="true">
+    <defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#2b2b2b"/><stop offset="1" stop-color="#0a0a0a"/>
+    </linearGradient></defs>
+    <path d="M6 50 C 10 35, 25 18, 40 8 C 46 27, 51 39, 58 50 Z" fill="url(#g)" stroke="#111" stroke-width="1.5"/>
+    <rect x="4" y="50" width="56" height="6" fill="#0b2744"/>
+  </svg>
+  <div>
+    <div class="title"><span>Amity</span> Island Emergency Bulletin</div>
+    <div class="sub">“You’re gonna need a bigger boat.” — Chief Brody</div>
+  </div>
+</header>
+
+<div class="card challenge">
+  <strong>Challenge:</strong> The mayor of Amity Island left a secret warning about the shark attack… but it’s written backwards.
+  Only by reversing it will you know the passphrase to get off the beach before the shark strikes again.
+  <div class="stamp">Amity Police • Confidential</div>
+</div>
+
+<div class="card task">
+  <strong>Task:</strong>
+  <ol>
     <li>Reverse the scrambled message.</li>
     <li>Create your function to return the correct passphrase.</li>
-    <li>If correct, you'll see the flag. Submit that flag.</li>
-</ol>
-</p>
-Example: If backwards is 'swaJ' you would return 'Jaws'
-<textarea id="editor" style="width:100%;height:200px;background-color: black; color: lime;">
+    <li>If correct, you’ll see the flag. Submit that flag.</li>
+  </ol>
+  <p><em>Example:</em> If backwards is <code>'swaJ'</code> you would return <code>'Jaws'</code>.</p>
+</div>
+
+<textarea id="editor">
 def passphrase(backwards):
     # Your code here
+    output = ""
     return output
+
 # Test case don't type below this
 run_selected_test()
 </textarea>
 
-<button onclick="runCode()" style="margin-top:10px;">Run Unit Tests</button>
+<button onclick="runCode()">Run Unit Tests</button>
 
-<textarea id="output" style="width:100%;height:150px;border:1px solid #ccc;overflow-y:auto;padding:10px;margin-top:10px;background-color: black; color: lime;">
-    Output or flag will appear here...
-</textarea>
+<textarea id="output">Output or flag will appear here...</textarea>
 
 <script src="https://cdn.jsdelivr.net/pyodide/v0.22.1/full/pyodide.js"></script>
 <script>
-    async function runCode() {
-        const editor = document.getElementById("editor").value;
-        const output = document.getElementById("output");
-        if (editor.includes("import os") || editor.includes("import shutil")) {
-            output.innerHTML = "ERROR: Usage of 'import os' and 'import shutil' are not allowed";
-            return;
-        }
+  async function runCode() {
+    const editor = document.getElementById("editor").value;
+    const output = document.getElementById("output");
 
-        output.innerHTML = "Running...";
+    if (editor.includes("import os") || editor.includes("import shutil")) {
+      output.innerHTML = "ERROR: Usage of 'import os' and 'import shutil' are not allowed";
+      return;
+    }
 
-        try {
-            // Load Pyodide and initialize it
-            const pyodide = await loadPyodide();
+    output.innerHTML = "Running...";
 
-            // Preload the test infrastructure
-            pyodide.runPython(`
-import sys
-import unittest
+    try {
+      const pyodide = await loadPyodide();
+
+      // Preload the test infrastructure (JAWS-themed strings)
+      pyodide.runPython(`
+import sys, unittest
 from io import StringIO
 from unittest.mock import patch
 
 sys.stdout = StringIO()
 sys.stderr = StringIO()
 
+class CustomTestResult(unittest.TextTestResult):
+    def addSuccess(self, test):
+        # Silence "ok" lines to keep output clean
+        pass
+
 def run_selected_test():
     class TestPyNight(unittest.TestCase):
+
         @patch('sys.stdout', new_callable=StringIO)
         def test_passphrase(self, mock_stdout):
-            """Test passphrase() function."""
-            ans1 = passphrase("Tattarrattat")
-            self.assertEqual(ans1, "tattarrattaT")
-            mock_stdout.truncate(0)
-            mock_stdout.seek(0)
-            ans2 = passphrase("stay out of the water")
-            self.assertEqual(ans2, "retaw eht fo tuo yats")
+            """Test passphrase() reverses JAWS-themed warnings."""
+            # 1) Iconic line
+            s1_backwards = ".taob reggib a deen annog er'uoy"
+            self.assertEqual(passphrase(s1_backwards), "you're gonna need a bigger boat.")
+
+            # 2) Farewell sea shanty
+            s2_backwards = "seidal hsinapS riaf uoy ot ueida dna lleweraf"
+            self.assertEqual(passphrase(s2_backwards), "farewell and adieu to you fair Spanish ladies")
+
+            # 3) Mixed case / punctuation
+            s3_backwards = "!KRAHS A SI SIHT"
+            self.assertEqual(passphrase(s3_backwards), "THIS IS A SHARK!")
+
+            # 4) Empty & whitespace-only cases
+            self.assertEqual(passphrase(""), "")
+            self.assertEqual(passphrase("   "), "   ")
+
+            # 5) Single char
+            self.assertEqual(passphrase("J"), "J")
 
     # Run the tests
     suite = unittest.TestSuite()
@@ -69,22 +172,21 @@ def run_selected_test():
     result = runner.run(suite)
     if result.wasSuccessful():
         print(success_message)
-class CustomTestResult(unittest.TextTestResult):
-    def addSuccess(self, test):
-        pass
 `);
 
-            // Execute the user's Python code
-            pyodide.runPython(editor);
+      // Execute the user's Python code
+      pyodide.runPython(editor);
 
-            // Retrieve the results
-            const stdout = pyodide.runPython("sys.stdout.getvalue()");
-            const stderr = pyodide.runPython("sys.stderr.getvalue()");
+      // Retrieve the results
+      const stdout = pyodide.runPython("sys.stdout.getvalue()");
+      const stderr = pyodide.runPython("sys.stderr.getvalue()");
 
-            // Display results
-            output.innerHTML = stdout || stderr || "No output.";
-        } catch (error) {
-            output.innerHTML = `Error: ${error}`;
-        }
+      // Display results
+      output.innerHTML = stdout || stderr || "No output.";
+    } catch (error) {
+      output.innerHTML = "Error: " + error;
     }
+  }
 </script>
+</body>
+</html>

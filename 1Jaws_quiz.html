@@ -1,325 +1,343 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multiple Choice Quiz</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        .question {
-            margin-bottom: 10px;
-        }
-        .answer {
-            margin: 5px 0;
-        }
-        #feedback {
-            margin-top: 20px;
-            font-weight: bold;
-            display: none;
-        }
-        #feedback.correct {
-            color: green;
-        }
-        #feedback.incorrect {
-            color: red;
-        }
-        #flag {
-            margin-top: 20px;
-            font-weight: bold;
-            color: green;
-            display: none;
-        }
-        #fake-flag {
-            margin-top: 20px;
-            font-weight: bold;
-            color: red;
-            display: none;
-        }
-        .progress-bar {
-            width: 100%;
-            background-color: #f3f3f3;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        .progress-bar-fill {
-            height: 20px;
-            width: 0%;
-            background-color: #4caf50;
-            border-radius: 5px;
-            transition: width 0.3s;
-        }
-        #timer {
-            font-weight: bold;
-            margin-top: 10px;
-        }
-    </style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>1Jaws_quiz — Amity Island Emergency Quiz</title>
+  <style>
+    :root{
+      --ocean1:#001d3d;
+      --ocean2:#003566;
+      --foam:#cfe8ff;
+      --blood:#b30000;
+      --ink:#0f0;
+    }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+      color:#fff;
+      background:
+        radial-gradient(80vw 40vh at 50% -10%, var(--foam), transparent 60%),
+        linear-gradient(180deg, var(--ocean1), var(--ocean2) 60%, #000 100%);
+      min-height:100vh;
+      padding:24px;
+    }
+    header{ display:flex; gap:16px; align-items:center; margin-bottom:16px; }
+    .fin{ width:64px; height:64px; }
+    .title{
+      font-weight:900; letter-spacing:.03em; line-height:1.1;
+      text-transform:uppercase; font-size:clamp(20px,4vw,36px);
+    }
+    .title span{ color:var(--blood); }
+    .sub{ opacity:.9; margin-top:4px; font-size:14px }
+    .card{
+      background:rgba(0,0,0,.45);
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:14px; padding:16px; backdrop-filter: blur(4px);
+      box-shadow:0 10px 30px rgba(0,0,0,.4);
+      margin-bottom:16px;
+    }
+    .progress-bar{
+      width:100%; background-color:#0b2744; border:1px solid #173a5e;
+      border-radius:8px; height:16px; overflow:hidden;
+    }
+    .progress-bar-fill{
+      height:100%; width:0%; background:linear-gradient(90deg,#2aff95,#00d7ff);
+      transition:width .3s;
+    }
+    #quiz-container .question{ margin-bottom:10px; font-weight:600; }
+    .answer{ margin:6px 0; }
+    #feedback{ margin-top:16px; font-weight:bold; display:none; }
+    #feedback.correct{ color:#4be14b; }
+    #feedback.incorrect{ color:#ff9696; }
+    #flag, #fake-flag{
+      margin-top:16px; font-weight:bold; display:none;
+    }
+    #flag{ color:#4be14b; }
+    #fake-flag{ color:#ff6b6b; }
+    #timer{ font-weight:700; margin-top:10px; color:#ffecd1; }
+    button{
+      margin-top:10px; padding:10px 14px; border-radius:10px; border:1px solid #2a2a2a;
+      background:linear-gradient(180deg,#222,#111); color:#fff; cursor:pointer;
+    }
+    button:hover{ transform: translateY(-1px); }
+    .stamp{
+      display:inline-block; margin-top:6px; padding:4px 8px; border:1px dashed #ffcab3;
+      color:#ffcab3; border-radius:8px; font-size:12px; letter-spacing:.04em;
+    }
+  </style>
 </head>
 <body>
 
-<div class="progress-bar">
-    <div class="progress-bar-fill" id="progress-bar-fill"></div>
+<header>
+  <!-- Shark fin SVG -->
+  <svg class="fin" viewBox="0 0 64 64" aria-hidden="true">
+    <defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#2b2b2b"/><stop offset="1" stop-color="#0a0a0a"/>
+    </linearGradient></defs>
+    <path d="M6 50 C 10 35, 25 18, 40 8 C 46 27, 51 39, 58 50 Z" fill="url(#g)" stroke="#111" stroke-width="1.5"/>
+    <rect x="4" y="50" width="56" height="6" fill="#0b2744"/>
+  </svg>
+  <div>
+    <div class="title"><span>Amity</span> Island Emergency Quiz</div>
+    <div class="sub">“You’re gonna need a bigger boat.” — Chief Brody</div>
+  </div>
+</header>
+
+<div class="card">
+  <div class="progress-bar"><div class="progress-bar-fill" id="progress-bar-fill"></div></div>
+  <div id="quiz-container"></div>
+  <div id="timer">Time Remaining: <span id="time-remaining">60</span> seconds</div>
+  <div id="feedback" class=""></div>
+  <div id="flag">JAWS{hooper_would_be_proud}</div>
+  <div id="fake-flag">The shark won this time. Try again</div>
+  <div class="stamp">Amity Police • Training Division</div>
 </div>
 
-<div id="quiz-container"></div>
-
-<div id="timer">Time Remaining: <span id="time-remaining">60</span> seconds</div>
-
-<div id="feedback" class=""></div>
-<div id="flag">JAWS{hooper_would_be_proud}</div>
-<div id="fake-flag">The shark won this time. Try again</div>
-
 <script>
-    const questions = [
-        {
-            question: "Quint needs the perfect tool to measure the shark’s depth. It must store values like 23.75 meters — including decimals! Which Python variable type would be best for this measurement?",
-            options: ["int", "char", "float", "boolean"],
-            correct: 2,
-            incorrectFeedback: ["Integers don’t store decimals.", "Python doesn’t use 'char' for single characters like some languages.", "Booleans are only True/False."]
-        },
-        {
-            question: "Brody’s binoculars detect movement in the water. You want a variable that can store True/False values to track if a shark is spotted. Which type should you use?",
-            options: ["int", "float", "boolean", "string"],
-            correct: 2,
-            incorrectFeedback: ["Integers aren’t meant for True/False state.", "Floats are for decimal numbers, not True/False.", "Strings hold text, not boolean logic."]
-        },
-        {
-            question: "The harbor master needs to count the number of boats in the water. It must be a whole number. Which type would be best?",
-            options: ["int", "float", "boolean", "string"],
-            correct: 0,
-            incorrectFeedback: ["Floats are for decimals, not whole counts.", "Booleans are only True/False.", "Strings store text, not numeric counts."]
-        },
-        {
-            question: "Hooper wants to name the shark so they can track it in their records. Which variable type would be best for storing the shark’s name?",
-            options: ["boolean", "float", "string", "int"],
-            correct: 2,
-            incorrectFeedback: ["True/False won’t store names.", "Floats are numeric with decimals.", "Integers are whole numbers, not names."]
-        },
-        {
-            question: "The captain needs to throw the net exactly 5 times in a row. Which Python statement is best for repeating code a fixed number of times?",
-            options: ["if", "while", "for", "return"],
-            correct: 2,
-            incorrectFeedback: ["'if' doesn’t loop; it branches once.", "'while' is better for unknown counts, not a fixed range.", "'return' exits a function; it doesn’t loop."]
-        },
-        {
-            question: "You only want to chase the shark if it’s longer than 5 meters. Which operator checks for this condition?",
-            options: ["=", "==", ">", "<"],
-            correct: 2,
-            incorrectFeedback: ["'=' assigns a value; it doesn’t compare.", "'==' checks equality, not greater-than.", "'<' checks less-than, not greater-than."]
-        },
-        {
-            question: "Hooper needs to keep track of multiple GPS coordinates where the shark was spotted. Which Python structure should he use?",
-            options: ["int", "list", "float", "char"],
-            correct: 1,
-            incorrectFeedback: ["A single integer can’t hold multiple coordinates.", "A float is one decimal number, not a collection.", "Python doesn’t have a standalone 'char' type like C."]
-        },
-        {
-            question: "The mayor wants a function that sounds the alarm. Which keyword defines a function in Python?",
-            options: ["function", "def", "define", "call"],
-            correct: 1,
-            incorrectFeedback: ["'function' isn’t a Python keyword.", "'define' isn’t a Python keyword.", "'call' is not how you define a function."]
-        },
-        {
-            question: "You want to keep scanning for sharks as long as they haven’t been found. Which type of loop would keep running until a condition becomes false?",
-            options: ["for", "while", "if", "def"],
-            correct: 1,
-            incorrectFeedback: ["'for' iterates over a sequence or range, not a condition loop.", "'if' is a one-time conditional, not a loop.", "'def' defines a function, not a loop."]
-        },
-        {
-            question: "If the sonar picks up a shark, you want to stop the search immediately. Which Python keyword stops a loop?",
-            options: ["end", "stop", "break", "quit"],
-            correct: 2,
-            incorrectFeedback: ["'end' isn’t a Python loop control keyword.", "'stop' isn’t a Python loop control keyword.", "'quit' exits the interpreter in some contexts, not a loop."]
-        }
-    ];
-
-    let currentQuestionIndex = 0;
-    let correctAnswers = 0;
-    let timeRemaining = 60;
-    let timerInterval = null;
-    let maxAttempts = 3;
-    let attemptsLeft = maxAttempts;
-
-    function updateProgressBar() {
-        const progressBarFill = document.getElementById("progress-bar-fill");
-        const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
-        progressBarFill.style.width = `${progress}%`;
+  const questions = [
+    {
+      question: "Quint needs the perfect tool to measure the shark’s depth. It must store values like 23.75 meters — including decimals! Which Python variable type would be best for this measurement?",
+      options: ["int", "char", "float", "boolean"],
+      correct: 2,
+      incorrectFeedback: ["Integers don’t store decimals.", "Python doesn’t use 'char' for single characters like some languages.", "Booleans are only True/False."]
+    },
+    {
+      question: "Brody’s binoculars detect movement in the water. You want a variable that can store True/False values to track if a shark is spotted. Which type should you use?",
+      options: ["int", "float", "boolean", "string"],
+      correct: 2,
+      incorrectFeedback: ["Integers aren’t meant for True/False state.", "Floats are for decimal numbers, not True/False.", "Strings hold text, not boolean logic."]
+    },
+    {
+      question: "The harbor master needs to count the number of boats in the water. It must be a whole number. Which type would be best?",
+      options: ["int", "float", "boolean", "string"],
+      correct: 0,
+      incorrectFeedback: ["Floats are for decimals, not whole counts.", "Booleans are only True/False.", "Strings store text, not numeric counts."]
+    },
+    {
+      question: "Hooper wants to name the shark so they can track it in their records. Which variable type would be best for storing the shark’s name?",
+      options: ["boolean", "float", "string", "int"],
+      correct: 2,
+      incorrectFeedback: ["True/False won’t store names.", "Floats are numeric with decimals.", "Integers are whole numbers, not names."]
+    },
+    {
+      question: "The captain needs to throw the net exactly 5 times in a row. Which Python statement is best for repeating code a fixed number of times?",
+      options: ["if", "while", "for", "return"],
+      correct: 2,
+      incorrectFeedback: ["'if' doesn’t loop; it branches once.", "'while' is better for unknown counts, not a fixed range.", "'return' exits a function; it doesn’t loop."]
+    },
+    {
+      question: "You only want to chase the shark if it’s longer than 5 meters. Which operator checks for this condition?",
+      options: ["=", "==", ">", "<"],
+      correct: 2,
+      incorrectFeedback: ["'=' assigns a value; it doesn’t compare.", "'==' checks equality, not greater-than.", "'<' checks less-than, not greater-than."]
+    },
+    {
+      question: "Hooper needs to keep track of multiple GPS coordinates where the shark was spotted. Which Python structure should he use?",
+      options: ["int", "list", "float", "char"],
+      correct: 1,
+      incorrectFeedback: ["A single integer can’t hold multiple coordinates.", "A float is one decimal number, not a collection.", "Python doesn’t have a standalone 'char' type like C."]
+    },
+    {
+      question: "The mayor wants a function that sounds the alarm. Which keyword defines a function in Python?",
+      options: ["function", "def", "define", "call"],
+      correct: 1,
+      incorrectFeedback: ["'function' isn’t a Python keyword.", "'define' isn’t a Python keyword.", "'call' is not how you define a function."]
+    },
+    {
+      question: "You want to keep scanning for sharks as long as they haven’t been found. Which type of loop would keep running until a condition becomes false?",
+      options: ["for", "while", "if", "def"],
+      correct: 1,
+      incorrectFeedback: ["'for' iterates over a sequence or range, not a condition loop.", "'if' is a one-time conditional, not a loop.", "'def' defines a function, not a loop."]
+    },
+    {
+      question: "If the sonar picks up a shark, you want to stop the search immediately. Which Python keyword stops a loop?",
+      options: ["end", "stop", "break", "quit"],
+      correct: 2,
+      incorrectFeedback: ["'end' isn’t a Python loop control keyword.", "'stop' isn’t a Python loop control keyword.", "'quit' exits the interpreter in some contexts, not a loop."]
     }
+  ];
 
-    function startTimer() {
-        const timerDisplay = document.getElementById("time-remaining");
+  let currentQuestionIndex = 0;
+  let correctAnswers = 0;
+  let timeRemaining = 60;
+  let timerInterval = null;
+  const maxAttempts = 3;
+  let attemptsLeft = maxAttempts;
+
+  function updateProgressBar() {
+    const progressBarFill = document.getElementById("progress-bar-fill");
+    const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+    progressBarFill.style.width = `${progress}%`;
+  }
+
+  function startTimer() {
+    const timerDisplay = document.getElementById("time-remaining");
+    clearInterval(timerInterval);
+    timeRemaining = 60;
+    timerDisplay.textContent = timeRemaining;
+
+    timerInterval = setInterval(() => {
+      timeRemaining--;
+      timerDisplay.textContent = timeRemaining;
+
+      if (timeRemaining <= 0) {
         clearInterval(timerInterval);
-        timeRemaining = 60; // Reset timer
-        timerDisplay.textContent = timeRemaining;
+        handleTimeout();
+      }
+    }, 1000);
+  }
 
-        timerInterval = setInterval(() => {
-            timeRemaining--;
-            timerDisplay.textContent = timeRemaining;
+  function handleTimeout() {
+    const feedback = document.getElementById("feedback");
+    feedback.textContent = "Time's up! Moving to the next question.";
+    feedback.className = "incorrect";
+    feedback.style.display = "block";
 
-            if (timeRemaining <= 0) {
-                clearInterval(timerInterval);
-                handleTimeout();
-            }
-        }, 1000);
+    setTimeout(() => {
+      feedback.style.display = "none";
+      nextQuestion();
+    }, 2000);
+  }
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function loadQuestion() {
+    const quizContainer = document.getElementById("quiz-container");
+    quizContainer.innerHTML = "";
+
+    const questionObj = questions[currentQuestionIndex];
+    attemptsLeft = maxAttempts;
+
+    // Build full feedback aligned to original options
+    const fullFeedback = new Array(questionObj.options.length);
+    let fbIdx = 0;
+    for (let i = 0; i < questionObj.options.length; i++) {
+      if (i === questionObj.correct) {
+        fullFeedback[i] = null;
+      } else {
+        fullFeedback[i] = questionObj.incorrectFeedback?.[fbIdx++] ?? "Incorrect answer.";
+      }
     }
 
-    function handleTimeout() {
-        const feedback = document.getElementById("feedback");
-        feedback.textContent = "Time's up! Moving to the next question.";
-        feedback.className = "incorrect";
-        feedback.style.display = "block";
+    // Build meta options with correctness/feedback, then shuffle together
+    let optionsMeta = questionObj.options.map((text, idx) => ({
+      text,
+      isCorrect: idx === questionObj.correct,
+      feedback: fullFeedback[idx]
+    }));
+    optionsMeta = shuffle(optionsMeta);
 
+    const questionElement = document.createElement("div");
+    questionElement.className = "question";
+    questionElement.innerHTML = `<strong>Q${currentQuestionIndex + 1}: ${questionObj.question}</strong>`;
+    quizContainer.appendChild(questionElement);
+
+    optionsMeta.forEach((opt, index) => {
+      const optionContainer = document.createElement("div");
+      optionContainer.className = "answer";
+
+      const radioInput = document.createElement("input");
+      radioInput.type = "radio";
+      radioInput.name = "question";
+      radioInput.id = `option${index}`;
+      radioInput.value = index;
+
+      const label = document.createElement("label");
+      label.setAttribute("for", `option${index}`);
+      label.textContent = opt.text;
+
+      optionContainer.appendChild(radioInput);
+      optionContainer.appendChild(label);
+      quizContainer.appendChild(optionContainer);
+    });
+
+    const submitButton = document.createElement("button");
+    submitButton.textContent = "Submit";
+    submitButton.onclick = () => checkAnswer(optionsMeta);
+    quizContainer.appendChild(submitButton);
+
+    updateProgressBar();
+    startTimer();
+  }
+
+  function checkAnswer(optionsMeta) {
+    const options = document.getElementsByName("question");
+    let selectedIndex = null;
+
+    for (const option of options) {
+      if (option.checked) {
+        selectedIndex = parseInt(option.value, 10);
+        break;
+      }
+    }
+
+    const feedbackEl = document.getElementById("feedback");
+
+    if (selectedIndex === null) {
+      feedbackEl.textContent = "Please select an answer!";
+      feedbackEl.className = "incorrect";
+      feedbackEl.style.display = "block";
+      return;
+    }
+
+    const chosen = optionsMeta[selectedIndex];
+
+    if (chosen.isCorrect) {
+      feedbackEl.textContent = "Correct! Moving to the next question...";
+      feedbackEl.className = "correct";
+      feedbackEl.style.display = "block";
+      correctAnswers++;
+
+      clearInterval(timerInterval);
+      setTimeout(() => {
+        feedbackEl.style.display = "none";
+        nextQuestion();
+      }, 1000);
+    } else {
+      attemptsLeft--;
+      feedbackEl.textContent = chosen.feedback || "Incorrect answer.";
+      feedbackEl.className = "incorrect";
+      feedbackEl.style.display = "block";
+
+      if (attemptsLeft <= 0) {
+        feedbackEl.textContent = "No attempts left! Moving to the next question.";
+        clearInterval(timerInterval);
         setTimeout(() => {
-            feedback.style.display = "none";
-            nextQuestion();
+          feedbackEl.style.display = "none";
+          nextQuestion();
         }, 2000);
+      }
     }
+  }
 
-    function shuffle(arr) {
-        const a = arr.slice();
-        for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-        }
-        return a;
+  function nextQuestion() {
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length) {
+      loadQuestion();
+    } else {
+      showFlag();
     }
+  }
 
-    function loadQuestion() {
-        const quizContainer = document.getElementById("quiz-container");
-        quizContainer.innerHTML = "";
-
-        const questionObj = questions[currentQuestionIndex];
-        attemptsLeft = maxAttempts; // Reset attempts for the new question
-
-        // Build full feedback aligned to original options (fill only wrong options)
-        const fullFeedback = new Array(questionObj.options.length);
-        let fbIdx = 0;
-        for (let i = 0; i < questionObj.options.length; i++) {
-        if (i === questionObj.correct) {
-            fullFeedback[i] = null; // no incorrect feedback for correct choice
-        } else {
-            fullFeedback[i] = questionObj.incorrectFeedback?.[fbIdx++] ?? "Incorrect answer.";
-        }
-        }
-
-        // Build meta options: text + correctness + aligned feedback
-        let optionsMeta = questionObj.options.map((text, idx) => ({
-        text,
-        isCorrect: idx === questionObj.correct,
-        feedback: fullFeedback[idx]
-        }));
-
-        // Shuffle the options WITH their correctness/feedback preserved
-        optionsMeta = shuffle(optionsMeta);
-
-        const questionElement = document.createElement("div");
-        questionElement.className = "question";
-        questionElement.innerHTML = `<strong>Q${currentQuestionIndex + 1}: ${questionObj.question}</strong>`;
-        quizContainer.appendChild(questionElement);
-
-        optionsMeta.forEach((opt, index) => {
-        const optionContainer = document.createElement("div");
-        optionContainer.className = "answer";
-
-        const radioInput = document.createElement("input");
-        radioInput.type = "radio";
-        radioInput.name = "question";
-        radioInput.id = `option${index}`;
-        radioInput.value = index;
-
-        const label = document.createElement("label");
-        label.setAttribute("for", `option${index}`);
-        label.textContent = opt.text;
-
-        optionContainer.appendChild(radioInput);
-        optionContainer.appendChild(label);
-        quizContainer.appendChild(optionContainer);
-        });
-
-        const submitButton = document.createElement("button");
-        submitButton.textContent = "Submit";
-        // Pass the shuffled meta so checkAnswer knows which is correct
-        submitButton.onclick = () => checkAnswer(optionsMeta);
-        quizContainer.appendChild(submitButton);
-
-        updateProgressBar();
-        startTimer();
+  function showFlag() {
+    const score = (correctAnswers / questions.length) * 100;
+    if (score >= 90) {
+      document.getElementById("flag").style.display = "block";
+    } else {
+      document.getElementById("fake-flag").style.display = "block";
     }
+  }
 
-    function checkAnswer(optionsMeta) {
-        const options = document.getElementsByName("question");
-        let selectedIndex = null;
-
-        for (const option of options) {
-        if (option.checked) {
-            selectedIndex = parseInt(option.value, 10);
-            break;
-        }
-        }
-
-        const feedbackEl = document.getElementById("feedback");
-
-        if (selectedIndex === null) {
-            feedbackEl.textContent = "Please select an answer!";
-            feedbackEl.className = "incorrect";
-            feedbackEl.style.display = "block";
-            return;
-        }
-
-        const chosen = optionsMeta[selectedIndex];
-
-        if (chosen.isCorrect) {
-            feedbackEl.textContent = "Correct! Moving to the next question...";
-            feedbackEl.className = "correct";
-            feedbackEl.style.display = "block";
-            correctAnswers++;
-
-            clearInterval(timerInterval);
-            setTimeout(() => {
-                feedbackEl.style.display = "none";
-                nextQuestion();
-            }, 1000);
-        } else {
-            attemptsLeft--;
-            feedbackEl.textContent = chosen.feedback || "Incorrect answer.";
-            feedbackEl.className = "incorrect";
-            feedbackEl.style.display = "block";
-
-            if (attemptsLeft <= 0) {
-                feedbackEl.textContent = "No attempts left! Moving to the next question.";
-                clearInterval(timerInterval);
-                setTimeout(() => {
-                    feedbackEl.style.display = "none";
-                    nextQuestion();
-                }, 2000);
-            }
-        }
-    }
-
-    function nextQuestion() {
-        currentQuestionIndex++;
-
-        if (currentQuestionIndex < questions.length) {
-            loadQuestion();
-        } else {
-            showFlag();
-        }
-    }
-
-    function showFlag() {
-        const score = (correctAnswers / questions.length) * 100;
-        if (score >= 90) {
-            document.getElementById("flag").style.display = "block";
-        } else {
-            document.getElementById("fake-flag").style.display = "block";
-        }
-    }
-
-    // Initialize the first question
-    loadQuestion();
+  // Initialize
+  loadQuestion();
 </script>
 
 </body>

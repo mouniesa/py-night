@@ -1,15 +1,141 @@
-Challenge: Amity's waters include a dangerous predator — the shark.
-Your mission: write Python code to find the position of 'shark' in the list of fish seen.
-<p>
-Task:
-<ol>
-    <li>Write a Python script that loops through the list of `fish` spotted .</li>
-    <li>Find the index (position) of 'shark'</li>
-    <li>return that position.</li>
-</ol>
-</p>
-Example list: fish = ["bass", "tuna", "shark", "grouper"], since python lists start at 0, the script should print "2"
-<textarea id="editor" style="width:100%;height:200px;background-color: black; color: lime;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jaws — Shark Search</title>
+<style>
+:root {
+  --ocean1: #001d3d;
+  --ocean2: #003566;
+  --foam: #cfe8ff;
+  --blood: #b30000;
+  --ink: #0f0;
+}
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  color: #fff;
+  background:
+    radial-gradient(80vw 40vh at 50% -10%, var(--foam), transparent 60%),
+    linear-gradient(180deg, var(--ocean1), var(--ocean2) 60%, #000 100%);
+  min-height: 100vh;
+  padding: 24px;
+}
+header {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.fin {
+  width: 64px;
+  height: 64px;
+}
+.title {
+  font-weight: 900;
+  letter-spacing: .03em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  font-size: clamp(20px, 4vw, 36px);
+}
+.title span {
+  color: var(--blood);
+}
+.sub {
+  opacity: .9;
+  margin-top: 4px;
+  font-size: 14px;
+}
+.card {
+  background: rgba(0, 0, 0, .45);
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 14px;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .4);
+  margin-bottom: 16px;
+}
+.challenge strong {
+  color: var(--blood);
+}
+.task ol {
+  margin: 8px 0 0 20px;
+}
+#editor, #output {
+  width: 100%;
+  background: #000;
+  color: var(--ink);
+  border-radius: 10px;
+  border: 1px solid #2a2a2a;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+#editor {
+  height: 200px;
+  padding: 10px;
+}
+#output {
+  height: 150px;
+  padding: 10px;
+  overflow-y: auto;
+}
+button {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #2a2a2a;
+  background: linear-gradient(180deg, #222, #111);
+  color: #fff;
+  cursor: pointer;
+}
+button:hover {
+  transform: translateY(-1px);
+}
+.stamp {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 4px 8px;
+  border: 1px dashed #ffcab3;
+  color: #ffcab3;
+  border-radius: 8px;
+  font-size: 12px;
+  letter-spacing: .04em;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <!-- Shark fin SVG -->
+  <svg class="fin" viewBox="0 0 64 64" aria-hidden="true">
+    <defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#2b2b2b"/><stop offset="1" stop-color="#0a0a0a"/>
+    </linearGradient></defs>
+    <path d="M6 50 C 10 35, 25 18, 40 8 C 46 27, 51 39, 58 50 Z" fill="url(#g)" stroke="#111" stroke-width="1.5"/>
+    <rect x="4" y="50" width="56" height="6" fill="#0b2744"/>
+  </svg>
+  <div>
+    <div class="title"><span>Amity</span> Harbor Patrol</div>
+    <div class="sub">"I think we’re gonna need a bigger boat."</div>
+  </div>
+</header>
+
+<div class="card challenge">
+  <strong>Challenge:</strong> Amity’s waters include a dangerous predator — the shark. Your mission: write Python code to find the position of <code>'shark'</code> in the list of fish seen.
+  <div class="stamp">Amity Police • Marine Division</div>
+</div>
+
+<div class="card task">
+  <strong>Task:</strong>
+  <ol>
+    <li>Loop through the list of <code>fish</code> spotted.</li>
+    <li>Find the index (position) of <code>'shark'</code>.</li>
+    <li>Return that position as a string.</li>
+  </ol>
+  <p><em>Example:</em> <code>fish = ["bass", "tuna", "shark", "grouper"]</code> → returns <code>"2"</code>.</p>
+</div>
+
+<textarea id="editor">
 def shark_search():
     # Your code here
     return position
@@ -18,38 +144,35 @@ def shark_search():
 run_selected_test()
 </textarea>
 
-<button onclick="runCode()" style="margin-top:10px;">Run Unit Tests</button>
+<button onclick="runCode()">Run Unit Tests</button>
 
-<textarea id="output" style="width:100%;height:150px;border:1px solid #ccc;overflow-y:auto;padding:10px;margin-top:10px;background-color: black; color: lime;">
-    Output or flag will appear here...
-</textarea>
+<textarea id="output">Output or flag will appear here...</textarea>
 
 <script src="https://cdn.jsdelivr.net/pyodide/v0.22.1/full/pyodide.js"></script>
 <script>
-    async function runCode() {
-        const editor = document.getElementById("editor").value;
-        const output = document.getElementById("output");
-        if (editor.includes("import os") || editor.includes("import shutil")) {
-            output.innerHTML = "ERROR: Usage of 'import os' and 'import shutil' are not allowed";
-            return;
-        }
-
-        output.innerHTML = "Running...";
-
-        try {
-            // Load Pyodide and initialize it
-            const pyodide = await loadPyodide();
-
-            // Preload the test infrastructure
-            pyodide.runPython(`
-import sys
-import unittest
+async function runCode() {
+  const editor = document.getElementById("editor").value;
+  const output = document.getElementById("output");
+  if (editor.includes("import os") || editor.includes("import shutil")) {
+    output.innerHTML = "ERROR: Usage of 'import os' and 'import shutil' are not allowed";
+    return;
+  }
+  output.innerHTML = "Running...";
+  try {
+    const pyodide = await loadPyodide();
+    pyodide.runPython(`
+import sys, unittest
 from io import StringIO
 from unittest.mock import patch
 
 sys.stdout = StringIO()
 sys.stderr = StringIO()
 fish = []
+
+class CustomTestResult(unittest.TextTestResult):
+    def addSuccess(self, test):
+        pass
+
 def run_selected_test():
     class TestPyNight(unittest.TestCase):
         @patch('sys.stdout', new_callable=StringIO)
@@ -62,7 +185,6 @@ def run_selected_test():
             result2 = shark_search()
             self.assertEqual(result2, str(fish.index("shark")))
 
-    # Run the tests
     suite = unittest.TestSuite()
     suite.addTest(TestPyNight("test_shark_search"))
     success_message = "Correct the flag is: JAWS{I have eyes on the beast.}"
@@ -70,22 +192,16 @@ def run_selected_test():
     result = runner.run(suite)
     if result.wasSuccessful():
         print(success_message)
-class CustomTestResult(unittest.TextTestResult):
-    def addSuccess(self, test):
-        pass
 `);
-
-            // Execute the user's Python code
-            pyodide.runPython(editor);
-
-            // Retrieve the results
-            const stdout = pyodide.runPython("sys.stdout.getvalue()");
-            const stderr = pyodide.runPython("sys.stderr.getvalue()");
-
-            // Display results
-            output.innerHTML = stdout || stderr || "No output.";
-        } catch (error) {
-            output.innerHTML = `Error: ${error}`;
-        }
-    }
+    pyodide.runPython(editor);
+    const stdout = pyodide.runPython("sys.stdout.getvalue()");
+    const stderr = pyodide.runPython("sys.stderr.getvalue()");
+    output.innerHTML = stdout || stderr || "No output.";
+  } catch (error) {
+    output.innerHTML = "Error: " + error;
+  }
+}
 </script>
+
+</body>
+</html>
