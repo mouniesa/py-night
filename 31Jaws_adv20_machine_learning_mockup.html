@@ -1,28 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>31Jaws_adv20_machine_learning_mockup</title>
+  <title>31Jaws_adv20_machine_learning_mockup — Directional Predictor</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .challenge { margin-bottom: 10px; }
-    .task { margin-bottom: 20px; }
-    #editor, #output { width:100%; background-color: black; color: lime; }
-    #editor { height: 240px; }
-    #output { height: 150px; border:1px solid #ccc; overflow-y:auto; padding:10px; margin-top:10px; }
-    button { margin-top:10px; }
+    :root{
+      --ocean1:#001d3d; --ocean2:#003566; --foam:#cfe8ff; --blood:#b30000; --ink:#0f0;
+    }
+    body{
+      margin:0; color:#fff;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+      background:
+        radial-gradient(80vw 40vh at 50% -10%, var(--foam), transparent 60%),
+        linear-gradient(180deg, var(--ocean1), var(--ocean2) 60%, #000 100%);
+      min-height:100vh; padding:24px;
+    }
+    header{ display:flex; gap:16px; align-items:center; margin-bottom:16px; }
+    .fin{ width:64px; height:64px; }
+    .title{ font-weight:900; letter-spacing:.03em; line-height:1.1; text-transform:uppercase; font-size:clamp(20px,4vw,36px); }
+    .title span{ color:var(--blood); }
+    .sub{ opacity:.9; margin-top:4px; font-size:14px }
+    .card{
+      background:rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.18); border-radius:14px;
+      padding:16px; backdrop-filter: blur(4px); box-shadow:0 10px 30px rgba(0,0,0,.4); margin-bottom:16px;
+    }
+    .challenge strong{ color:var(--blood); }
+    .task ol{ margin:8px 0 0 20px; }
+    #editor,#output{
+      width:100%; background:#000; color:var(--ink); border-radius:10px; border:1px solid #2a2a2a;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+    }
+    #editor{ height:240px; padding:10px; }
+    #output{ height:150px; padding:10px; overflow-y:auto; }
+    button{
+      margin-top:10px; padding:10px 14px; border-radius:10px; border:1px solid #2a2a2a;
+      background:linear-gradient(180deg,#222,#111); color:#fff; cursor:pointer;
+    }
+    button:hover{ transform: translateY(-1px); }
+    .stamp{
+      display:inline-block; margin-top:6px; padding:4px 8px; border:1px dashed #ffcab3;
+      color:#ffcab3; border-radius:8px; font-size:12px; letter-spacing:.04em;
+    }
   </style>
 </head>
 <body>
 
-<div class="challenge">
+<header>
+  <!-- Shark fin SVG -->
+  <svg class="fin" viewBox="0 0 64 64" aria-hidden="true">
+    <defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#2b2b2b"/><stop offset="1" stop-color="#0a0a0a"/>
+    </linearGradient></defs>
+    <path d="M6 50 C 10 35, 25 18, 40 8 C 46 27, 51 39, 58 50 Z" fill="url(#g)" stroke="#111" stroke-width="1.5"/>
+    <rect x="4" y="50" width="56" height="6" fill="#0b2744"/>
+  </svg>
+  <div>
+    <div class="title"><span>Amity</span> Lab — Movement Predictor</div>
+    <div class="sub">“North, south, east, west—guess right, live another test.” — Harbor Analytics</div>
+  </div>
+</header>
+
+<div class="card challenge">
   <strong>Challenge:</strong> Predict next shark position from last movement direction.
+  <div class="stamp">Heuristics • Directional Model</div>
 </div>
-<div class="task">
+
+<div class="card task">
   <strong>Task:</strong>
   <ol>
-    <li>Implement predict_location(last_position, movement) handling north/south/east/west.</li>
+    <li>Implement <code>predict_location(last_position, movement)</code> handling <em>north</em>, <em>south</em>, <em>east</em>, <em>west</em>.</li>
+    <li>Return the next <code>(x, y)</code> position.</li>
     <li>Click <em>Run Unit Tests</em>. If all tests pass, you'll get the flag.</li>
   </ol>
 </div>
@@ -52,7 +100,8 @@ run_selected_test()
     output.innerHTML = "Running...";
     try {
       const pyodide = await loadPyodide();
-      // Preload tests
+
+      // Preload tests (kept the same)
       pyodide.runPython(`
 import sys, unittest
 from io import StringIO
@@ -66,14 +115,11 @@ class CustomTestResult(unittest.TextTestResult):
     def addSuccess(self, test):
         pass
 
-
-
 def run_selected_test():
 
     class TestMachineLearningMockup(unittest.TestCase):
         def test_prediction(self):
             self.assertEqual(predict_location((0,0), "north"), (0,1))
-
 
     suite = unittest.TestSuite()
     suite.addTest(TestMachineLearningMockup("test_prediction"))
@@ -83,8 +129,10 @@ def run_selected_test():
     if result.wasSuccessful():
         print(success_message)
 `);
+
       // Run user code
       pyodide.runPython(editor);
+
       // Show output
       const stdout = pyodide.runPython("sys.stdout.getvalue()");
       const stderr = pyodide.runPython("sys.stderr.getvalue()");
