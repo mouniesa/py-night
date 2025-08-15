@@ -1,0 +1,91 @@
+Challenge: Amity's waters include a dangerous predator — the shark.
+Your mission: write Python code to find the position of 'shark' in the list of fish seen.
+<p>
+Task:
+<ol>
+    <li>Write a Python script that loops through the list of `fish` spotted .</li>
+    <li>Find the index (position) of 'shark'</li>
+    <li>return that position.</li>
+</ol>
+</p>
+Example list: fish = ["bass", "tuna", "shark", "grouper"], since python lists start at 0, the script should print "2"
+<textarea id="editor" style="width:100%;height:200px;background-color: black; color: lime;">
+def shark_search():
+    # Your code here
+    return position
+
+# Test case don't type below this
+run_selected_test()
+</textarea>
+
+<button onclick="runCode()" style="margin-top:10px;">Run Unit Tests</button>
+
+<textarea id="output" style="width:100%;height:150px;border:1px solid #ccc;overflow-y:auto;padding:10px;margin-top:10px;background-color: black; color: lime;">
+    Output or flag will appear here...
+</textarea>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.22.1/full/pyodide.js"></script>
+<script>
+    async function runCode() {
+        const editor = document.getElementById("editor").value;
+        const output = document.getElementById("output");
+        if (editor.includes("import os") || editor.includes("import shutil")) {
+            output.innerHTML = "ERROR: Usage of 'import os' and 'import shutil' are not allowed";
+            return;
+        }
+
+        output.innerHTML = "Running...";
+
+        try {
+            // Load Pyodide and initialize it
+            const pyodide = await loadPyodide();
+
+            // Preload the test infrastructure
+            pyodide.runPython(`
+import sys
+import unittest
+from io import StringIO
+from unittest.mock import patch
+
+sys.stdout = StringIO()
+sys.stderr = StringIO()
+fish = []
+def run_selected_test():
+    class TestPyNight(unittest.TestCase):
+        @patch('sys.stdout', new_callable=StringIO)
+        def test_shark_search(self, mock_stdout):
+            global fish
+            fish = ["bass", "tuna", "shark", "grouper"]
+            result = shark_search()
+            self.assertEqual(result, str(fish.index("shark")))
+            fish = ["bass", "tuna", "bass", "tuna", "bass", "tuna", "shark", "grouper"]
+            result2 = shark_search()
+            self.assertEqual(result2, str(fish.index("shark")))
+
+    # Run the tests
+    suite = unittest.TestSuite()
+    suite.addTest(TestPyNight("test_shark_search"))
+    success_message = "Correct the flag is: JAWS{I have eyes on the beast.}"
+    runner = unittest.TextTestRunner(resultclass=CustomTestResult)
+    result = runner.run(suite)
+    if result.wasSuccessful():
+        print(success_message)
+class CustomTestResult(unittest.TextTestResult):
+    def addSuccess(self, test):
+        pass
+`);
+
+            // Execute the user's Python code
+            pyodide.runPython(editor);
+
+            // Retrieve the results
+            const stdout = pyodide.runPython("sys.stdout.getvalue()");
+            const stderr = pyodide.runPython("sys.stderr.getvalue()");
+
+            // Display results
+            output.innerHTML = stdout || stderr || "No output.";
+        } catch (error) {
+            output.innerHTML = `Error: ${error}`;
+        }
+    }
+</script>

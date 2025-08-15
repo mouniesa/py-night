@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>21Jaws_adv10_alert_system</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .challenge { margin-bottom: 10px; }
+    .task { margin-bottom: 20px; }
+    #editor, #output { width:100%; background-color: black; color: lime; }
+    #editor { height: 240px; }
+    #output { height: 150px; border:1px solid #ccc; overflow-y:auto; padding:10px; margin-top:10px; }
+    button { margin-top:10px; }
+  </style>
+</head>
+<body>
+
+<div class="challenge">
+  <strong>Challenge:</strong> Trigger an alert if any position lies inside the restricted rectangle.
+</div>
+<div class="task">
+  <strong>Task:</strong>
+  <ol>
+    <li>Implement check_alert(positions, zone) returning 'ALERT' or 'SAFE'.</li>
+    <li>Click <em>Run Unit Tests</em>. If all tests pass, you'll get the flag.</li>
+  </ol>
+</div>
+
+<textarea id="editor">
+def check_alert(positions, zone):
+    # Your code here
+    return "SAFE"
+
+# Test runner do not edit below
+run_selected_test()
+</textarea>
+
+<button onclick="runCode()">Run Unit Tests</button>
+
+<textarea id="output">Output or flag will appear here...</textarea>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.22.1/full/pyodide.js"></script>
+<script>
+  async function runCode() {
+    const editor = document.getElementById("editor").value;
+    const output = document.getElementById("output");
+    if (editor.includes("import os") || editor.includes("import shutil")) {
+      output.innerHTML = "ERROR: Usage of 'import os' and 'import shutil' are not allowed";
+      return;
+    }
+    output.innerHTML = "Running...";
+    try {
+      const pyodide = await loadPyodide();
+      // Preload tests
+      pyodide.runPython(`
+import sys, unittest
+from io import StringIO
+from unittest.mock import patch
+
+# Capture prints
+sys.stdout = StringIO()
+sys.stderr = StringIO()
+
+class CustomTestResult(unittest.TextTestResult):
+    def addSuccess(self, test):
+        pass
+
+
+
+def run_selected_test():
+
+    class TestAlertSystem(unittest.TestCase):
+        def test_alert(self):
+            self.assertEqual(check_alert([(5,5)], (0,0,10,10)), "ALERT")
+        def test_safe(self):
+            self.assertEqual(check_alert([(15,15)], (0,0,10,10)), "SAFE")
+
+
+    suite = unittest.TestSuite()
+    suite.addTest(TestAlertSystem("test_alert"))
+    suite.addTest(TestAlertSystem("test_safe"))
+    success_message = "Correct the flag is: Jaws{adv10_alert}"
+    runner = unittest.TextTestRunner(resultclass=CustomTestResult)
+    result = runner.run(suite)
+    if result.wasSuccessful():
+        print(success_message)
+`);
+      // Run user code
+      pyodide.runPython(editor);
+      // Show output
+      const stdout = pyodide.runPython("sys.stdout.getvalue()");
+      const stderr = pyodide.runPython("sys.stderr.getvalue()");
+      output.innerHTML = stdout || stderr || "No output.";
+    } catch (error) {
+      output.innerHTML = "Error: " + error;
+    }
+  }
+</script>
+
+</body>
+</html>

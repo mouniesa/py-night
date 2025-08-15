@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>11Jaws_depth_first</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .challenge { margin-bottom: 10px; }
+    .task { margin-bottom: 20px; }
+    #editor, #output { width:100%; background-color: black; color: lime; }
+    #editor { height: 220px; }
+    #output { height: 150px; border:1px solid #ccc; overflow-y:auto; padding:10px; margin-top:10px; }
+    button { margin-top:10px; }
+  </style>
+</head>
+<body>
+
+<div class="challenge">
+  <strong>Challenge:</strong> The shark is hiding somewhere in a tree of sonar pings. Use <em>Depth-First Search</em> to scan the tree and find the shark fast.
+</div>
+<div class="task">
+  <strong>Task:</strong>
+  <ol>
+    <li>Implement dfs_search(root) to perform a <em>preorder</em> depth-first traversal (visit root, then left, then right).</li>
+    <li>Return a list of node <em>values</em> in the order visited.</li>
+    <li>Click <em>Run Unit Tests</em>. If all tests pass, you'll get the flag.</li>
+  </ol>
+</div>
+
+<textarea id="editor">
+def dfs_search(root):
+    # Your code here
+    visited = []
+    return visited
+
+# Test runner do not edit below
+run_selected_test()
+</textarea>
+
+<button onclick="runCode()">Run Unit Tests</button>
+
+<textarea id="output">Output or flag will appear here...</textarea>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.22.1/full/pyodide.js"></script>
+<script>
+  async function runCode() {
+    const editor = document.getElementById("editor").value;
+    const output = document.getElementById("output");
+    if (editor.includes("import os") || editor.includes("import shutil")) {
+      output.innerHTML = "ERROR: Usage of 'import os' and 'import shutil' are not allowed";
+      return;
+    }
+
+    output.innerHTML = "Running...";
+
+    try {
+      const pyodide = await loadPyodide();
+
+      // Preload the unit test harness and tree model
+      pyodide.runPython(`
+import sys, unittest
+from io import StringIO
+from unittest.mock import patch
+
+# Capture prints to display in the browser text area
+sys.stdout = StringIO()
+sys.stderr = StringIO()
+
+# Suppress default 'ok' lines
+class CustomTestResult(unittest.TextTestResult):
+    def addSuccess(self, test):
+        pass
+
+class Node:
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+def build_tree(shark_side="left"):
+    #        ping1
+    #       /     \\
+    #   ping2     ping3
+    #   /   \\    /   \\
+    # ping4 shark shark ping5
+    root = Node("ping1")
+    root.left = Node("ping2")
+    root.right = Node("ping3")
+    if shark_side == "left":
+        root.left.left = Node("ping4")
+        root.left.right = Node("shark")
+    else:
+        root.right.left = Node("shark")
+        root.right.right = Node("ping5")
+    return root
+
+def build_unbalanced():
+    # pingA -> pingB -> shark (a skinny left‑leaning tree)
+    a = Node("pingA")
+    b = Node("pingB")
+    s = Node("shark")
+    a.left = b
+    b.left = s
+    return a
+
+def run_selected_test():
+    class TestDFS(unittest.TestCase):
+
+        @patch('sys.stdout', new_callable=StringIO)
+        def test_preorder_left_shark(self, mock_stdout):
+            root = build_tree("left")
+            result = dfs_search(root)
+            self.assertIsInstance(result, list)
+            # Preorder should visit root before its children
+            self.assertEqual(result[0], "ping1")
+            # Must include shark and visit left subtree before right
+            self.assertIn("shark", result)
+            self.assertLess(result.index("shark"), result.index("ping3"))
+
+        @patch('sys.stdout', new_callable=StringIO)
+        def test_preorder_right_shark(self, mock_stdout):
+            root = build_tree("right")
+            result = dfs_search(root)
+            self.assertEqual(result[0], "ping1")
+            # Ensure right subtree is reached and shark is found
+            self.assertIn("ping3", result)
+            self.assertIn("shark", result)
+
+        @patch('sys.stdout', new_callable=StringIO)
+        def test_empty_tree(self, mock_stdout):
+            self.assertEqual(dfs_search(None), [], "Empty tree should return an empty list")
+
+        @patch('sys.stdout', new_callable=StringIO)
+        def test_unbalanced_tree(self, mock_stdout):
+            root = build_unbalanced()
+            result = dfs_search(root)
+            self.assertEqual(result, ["pingA", "pingB", "shark"])
+
+        @patch('sys.stdout', new_callable=StringIO)
+        def test_no_printing(self, mock_stdout):
+            _ = dfs_search(build_tree("left"))
+            self.assertEqual(mock_stdout.getvalue(), "", "Function should not print anything.")
+
+    suite = unittest.TestSuite()
+    suite.addTest(TestDFS("test_preorder_left_shark"))
+    suite.addTest(TestDFS("test_preorder_right_shark"))
+    suite.addTest(TestDFS("test_empty_tree"))
+    suite.addTest(TestDFS("test_unbalanced_tree"))
+    suite.addTest(TestDFS("test_no_printing"))
+    success_message = "Correct the flag is: Jaws{deep_dive_success}"
+    runner = unittest.TextTestRunner(resultclass=CustomTestResult)
+    result = runner.run(suite)
+    if result.wasSuccessful():
+        print(success_message)
+`);
+
+      // Execute the user's Python code
+      pyodide.runPython(editor);
+
+      // Retrieve and display results
+      const stdout = pyodide.runPython("sys.stdout.getvalue()");
+      const stderr = pyodide.runPython("sys.stderr.getvalue()");
+      document.getElementById("output").innerHTML = stdout || stderr || "No output.";
+    } catch (error) {
+      document.getElementById("output").innerHTML = "Error: " + error;
+    }
+  }
+</script>
+
+</body>
+</html>

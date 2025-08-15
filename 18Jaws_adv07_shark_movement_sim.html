@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>18Jaws_adv07_shark_movement_sim</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .challenge { margin-bottom: 10px; }
+    .task { margin-bottom: 20px; }
+    #editor, #output { width:100%; background-color: black; color: lime; }
+    #editor { height: 240px; }
+    #output { height: 150px; border:1px solid #ccc; overflow-y:auto; padding:10px; margin-top:10px; }
+    button { margin-top:10px; }
+  </style>
+</head>
+<body>
+
+<div class="challenge">
+  <strong>Challenge:</strong> Simulate a shark moving randomly in a 10x10 grid.
+</div>
+<div class="task">
+  <strong>Task:</strong>
+  <ol>
+    <li>Implement simulate_moves(start=(0,0), moves=20) returning the final (x, y).</li>
+    <li>Keep the shark within [0,9] bounds.</li>
+    <li>Click <em>Run Unit Tests</em>. If all tests pass, you'll get the flag.</li>
+  </ol>
+</div>
+
+<textarea id="editor">
+def simulate_moves(start=(0,0), moves=20):
+    # Your code here
+    return start
+
+# Test runner do not edit below
+run_selected_test()
+</textarea>
+
+<button onclick="runCode()">Run Unit Tests</button>
+
+<textarea id="output">Output or flag will appear here...</textarea>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.22.1/full/pyodide.js"></script>
+<script>
+  async function runCode() {
+    const editor = document.getElementById("editor").value;
+    const output = document.getElementById("output");
+    if (editor.includes("import os") || editor.includes("import shutil")) {
+      output.innerHTML = "ERROR: Usage of 'import os' and 'import shutil' are not allowed";
+      return;
+    }
+    output.innerHTML = "Running...";
+    try {
+      const pyodide = await loadPyodide();
+      // Preload tests
+      pyodide.runPython(`
+import sys, unittest
+from io import StringIO
+from unittest.mock import patch
+
+# Capture prints
+sys.stdout = StringIO()
+sys.stderr = StringIO()
+
+class CustomTestResult(unittest.TextTestResult):
+    def addSuccess(self, test):
+        pass
+
+
+import random
+
+def run_selected_test():
+
+    class TestSharkMovement(unittest.TestCase):
+        def test_within_bounds(self):
+            x, y = simulate_moves()
+            self.assertTrue(0 <= x <= 9 and 0 <= y <= 9)
+        def test_randomness(self):
+            results = {simulate_moves() for _ in range(8)}
+            self.assertTrue(len(results) > 1, "Movement appears non-random")
+
+
+    suite = unittest.TestSuite()
+    suite.addTest(TestSharkMovement("test_within_bounds"))
+    suite.addTest(TestSharkMovement("test_randomness"))
+    success_message = "Correct the flag is: Jaws{adv07_swim_random}"
+    runner = unittest.TextTestRunner(resultclass=CustomTestResult)
+    result = runner.run(suite)
+    if result.wasSuccessful():
+        print(success_message)
+`);
+      // Run user code
+      pyodide.runPython(editor);
+      // Show output
+      const stdout = pyodide.runPython("sys.stdout.getvalue()");
+      const stderr = pyodide.runPython("sys.stderr.getvalue()");
+      output.innerHTML = stdout || stderr || "No output.";
+    } catch (error) {
+      output.innerHTML = "Error: " + error;
+    }
+  }
+</script>
+
+</body>
+</html>

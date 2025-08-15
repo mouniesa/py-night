@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>10Jaws_secure_wrapper</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .challenge { margin-bottom: 10px; }
+    .task { margin-bottom: 20px; }
+    #editor, #output { width:100%; background-color: black; color: lime; }
+    #editor { height: 220px; }
+    #output { height: 150px; border:1px solid #ccc; overflow-y:auto; padding:10px; margin-top:10px; }
+    button { margin-top:10px; }
+  </style>
+</head>
+<body>
+
+<div class="challenge">
+  <strong>Challenge:</strong> The shark tracker API requires all functions to be wrapped with security. Create a decorator that appends <em>_secure</em> to the output of functions it wraps.
+</div>
+<div class="task">
+  <strong>Task:</strong>
+  <ol>
+    <li>Implement secure_wrapper(func) so that the returned wrapper calls func() and appends <code>_secure</code> to its string result.</li>
+    <li>Do not print anything from your function.</li>
+    <li>Click <em>Run Unit Tests</em>. If all tests pass, you'll get the flag.</li>
+  </ol>
+</div>
+
+<textarea id="editor">
+def secure_wrapper(func):
+    # Your code here
+    def wrapper():
+        result = None
+        return result
+    return wrapper
+
+# Test runner do not edit below
+run_selected_test()
+</textarea>
+
+<button onclick="runCode()">Run Unit Tests</button>
+
+<textarea id="output">Output or flag will appear here...</textarea>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.22.1/full/pyodide.js"></script>
+<script>
+  async function runCode() {
+    const editor = document.getElementById("editor").value;
+    const output = document.getElementById("output");
+    if (editor.includes("import os") || editor.includes("import shutil")) {
+      output.innerHTML = "ERROR: Usage of 'import os' and 'import shutil' are not allowed";
+      return;
+    }
+
+    output.innerHTML = "Running...";
+
+    try {
+      const pyodide = await loadPyodide();
+
+      // Preload tests
+      pyodide.runPython(`
+import sys, unittest
+from io import StringIO
+from unittest.mock import patch
+
+# Capture prints to display in the browser text area
+sys.stdout = StringIO()
+sys.stderr = StringIO()
+
+# Prevent success 'ok' spam
+class CustomTestResult(unittest.TextTestResult):
+    def addSuccess(self, test):
+        pass
+
+def run_selected_test():
+    class TestSecureWrapper(unittest.TestCase):
+
+        @patch('sys.stdout', new_callable=StringIO)
+        def test_decorator_syntax(self, mock_stdout):
+            @secure_wrapper
+            def shark_data():
+                return "tracker"
+            self.assertEqual(shark_data(), "tracker_secure")
+
+        @patch('sys.stdout', new_callable=StringIO)
+        def test_assignment_style(self, mock_stdout):
+            def shark_data():
+                return "ping"
+            decorated = secure_wrapper(shark_data)
+            self.assertEqual(decorated(), "ping_secure")
+
+        @patch('sys.stdout', new_callable=StringIO)
+        def test_no_printing(self, mock_stdout):
+            def shark_data():
+                return "ok"
+            _ = secure_wrapper(shark_data)()
+            self.assertEqual(mock_stdout.getvalue(), "", "Decorator/wrapper should not print.")
+
+        @patch('sys.stdout', new_callable=StringIO)
+        def test_preserve_callability(self, mock_stdout):
+            calls = []
+            def shark_data():
+                calls.append(1)
+                return "data"
+            wrapped = secure_wrapper(shark_data)
+            self.assertTrue(callable(wrapped))
+            self.assertEqual(wrapped(), "data_secure")
+            self.assertEqual(len(calls), 1, "Original function should be invoked exactly once.")
+
+    suite = unittest.TestSuite()
+    suite.addTest(TestSecureWrapper("test_decorator_syntax"))
+    suite.addTest(TestSecureWrapper("test_assignment_style"))
+    suite.addTest(TestSecureWrapper("test_no_printing"))
+    suite.addTest(TestSecureWrapper("test_preserve_callability"))
+    success_message = "Correct the flag is: Jaws{secured_tracker}"
+    runner = unittest.TextTestRunner(resultclass=CustomTestResult)
+    result = runner.run(suite)
+    if result.wasSuccessful():
+        print(success_message)
+`);
+
+      // Execute the user's Python code
+      pyodide.runPython(editor);
+
+      // Retrieve and display results
+      const stdout = pyodide.runPython("sys.stdout.getvalue()");
+      const stderr = pyodide.runPython("sys.stderr.getvalue()");
+      document.getElementById("output").innerHTML = stdout || stderr || "No output.";
+    } catch (error) {
+      document.getElementById("output").innerHTML = "Error: " + error;
+    }
+  }
+</script>
+
+</body>
+</html>

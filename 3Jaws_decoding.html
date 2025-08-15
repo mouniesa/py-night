@@ -1,0 +1,96 @@
+Challenge: Quint's sonar picked up a reading, but it's encoded.
+You need to retrieve it from the sonar system and decode it.
+<p>
+Task:
+<ol>
+    <li>Write a script that calls `sonar_reading()` to get the base reading.</li>
+    <li>Multiply it by 3, then add 2 to get the depth code.</li>
+    <li>If the depth code is even put A infront, otherwise put B</li>
+    <li>Return that depth code.</li>
+</ol>
+</p>
+Example: If sonar_reading() returns 12, the depth code would be A38
+<textarea id="editor" style="width:100%;height:200px;background-color: black; color: lime;">
+def decode():
+    # Your code here
+    return depthCode
+
+# Test case don't type below this
+run_selected_test()
+</textarea>
+
+<button onclick="runCode()" style="margin-top:10px;">Run Unit Tests</button>
+
+<textarea id="output" style="width:100%;height:150px;border:1px solid #ccc;overflow-y:auto;padding:10px;margin-top:10px;background-color: black; color: lime;">
+    Output or flag will appear here...
+</textarea>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.22.1/full/pyodide.js"></script>
+<script>
+    async function runCode() {
+        const editor = document.getElementById("editor").value;
+        const output = document.getElementById("output");
+        if (editor.includes("import os") || editor.includes("import shutil")) {
+            output.innerHTML = "ERROR: Usage of 'import os' and 'import shutil' are not allowed";
+            return;
+        }
+
+        output.innerHTML = "Running...";
+
+        try {
+            // Load Pyodide and initialize it
+            const pyodide = await loadPyodide();
+
+            // Preload the test infrastructure
+            pyodide.runPython(`
+import sys
+import unittest
+from io import StringIO
+from unittest.mock import patch
+
+sys.stdout = StringIO()
+sys.stderr = StringIO()
+
+def sonar_reading():
+    return 0
+
+def run_selected_test():
+    class TestPyNight(unittest.TestCase):
+        @patch("__main__.sonar_reading", return_value=12)
+        def test_even_decode(self, mock_sonar):
+            result = decode()
+            self.assertEqual(result, "A38")
+
+        @patch("__main__.sonar_reading", return_value=7)
+        def test_odd_decode(self, mock_sonar):
+            result = decode()
+            self.assertEqual(result, "B23")
+
+    # Run the tests
+    suite = unittest.TestSuite()
+    suite.addTest(TestPyNight("test_even_decode"))
+    suite.addTest(TestPyNight("test_odd_decode"))
+    success_message = "Correct the flag is: JAWS{SONAR_LOCK_COMPLETE}"
+    runner = unittest.TextTestRunner(resultclass=CustomTestResult)
+    result = runner.run(suite)
+    if result.wasSuccessful():
+        print(success_message)
+class CustomTestResult(unittest.TextTestResult):
+    def addSuccess(self, test):
+        pass
+`);
+
+            // Execute the user's Python code
+            pyodide.runPython(editor);
+
+            // Retrieve the results
+            const stdout = pyodide.runPython("sys.stdout.getvalue()");
+            const stderr = pyodide.runPython("sys.stderr.getvalue()");
+
+            // Display results
+            output.innerHTML = stdout || stderr || "No output.";
+        } catch (error) {
+            output.innerHTML = `Error: ${error}`;
+        }
+    }
+</script>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>25Jaws_adv14_custom_json_parser</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .challenge { margin-bottom: 10px; }
+    .task { margin-bottom: 20px; }
+    #editor, #output { width:100%; background-color: black; color: lime; }
+    #editor { height: 240px; }
+    #output { height: 150px; border:1px solid #ccc; overflow-y:auto; padding:10px; margin-top:10px; }
+    button { margin-top:10px; }
+  </style>
+</head>
+<body>
+
+<div class="challenge">
+  <strong>Challenge:</strong> Parse a simple JSON string manually and extract the shark name.
+</div>
+<div class="task">
+  <strong>Task:</strong>
+  <ol>
+    <li>Implement parse_json_string(json_string).</li>
+    <li>Click <em>Run Unit Tests</em>. If all tests pass, you'll get the flag.</li>
+  </ol>
+</div>
+
+<textarea id="editor">
+def parse_json_string(json_string):
+    # Your code here
+    return ""
+
+# Test runner do not edit below
+run_selected_test()
+</textarea>
+
+<button onclick="runCode()">Run Unit Tests</button>
+
+<textarea id="output">Output or flag will appear here...</textarea>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.22.1/full/pyodide.js"></script>
+<script>
+  async function runCode() {
+    const editor = document.getElementById("editor").value;
+    const output = document.getElementById("output");
+    if (editor.includes("import os") || editor.includes("import shutil")) {
+      output.innerHTML = "ERROR: Usage of 'import os' and 'import shutil' are not allowed";
+      return;
+    }
+    output.innerHTML = "Running...";
+    try {
+      const pyodide = await loadPyodide();
+      // Preload tests
+      pyodide.runPython(`
+import sys, unittest
+from io import StringIO
+from unittest.mock import patch
+
+# Capture prints
+sys.stdout = StringIO()
+sys.stderr = StringIO()
+
+class CustomTestResult(unittest.TextTestResult):
+    def addSuccess(self, test):
+        pass
+
+
+
+def run_selected_test():
+
+    class TestCustomJsonParser(unittest.TestCase):
+        def test_parse(self):
+            self.assertEqual(parse_json_string('{"id":1,"name":"Jaws"}'), "Jaws")
+
+
+    suite = unittest.TestSuite()
+    suite.addTest(TestCustomJsonParser("test_parse"))
+    success_message = "Correct the flag is: Jaws{adv14_manual_json}"
+    runner = unittest.TextTestRunner(resultclass=CustomTestResult)
+    result = runner.run(suite)
+    if result.wasSuccessful():
+        print(success_message)
+`);
+      // Run user code
+      pyodide.runPython(editor);
+      // Show output
+      const stdout = pyodide.runPython("sys.stdout.getvalue()");
+      const stderr = pyodide.runPython("sys.stderr.getvalue()");
+      output.innerHTML = stdout || stderr || "No output.";
+    } catch (error) {
+      output.innerHTML = "Error: " + error;
+    }
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>15Jaws_adv04_multi_shark_tracking</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .challenge { margin-bottom: 10px; }
+    .task { margin-bottom: 20px; }
+    #editor, #output { width:100%; background-color: black; color: lime; }
+    #editor { height: 240px; }
+    #output { height: 150px; border:1px solid #ccc; overflow-y:auto; padding:10px; margin-top:10px; }
+    button { margin-top:10px; }
+  </style>
+</head>
+<body>
+
+<div class="challenge">
+  <strong>Challenge:</strong> Track multiple sharks with classes for Shark and Tracker.
+</div>
+<div class="task">
+  <strong>Task:</strong>
+  <ol>
+    <li>Create class Shark with id, name, location.</li>
+    <li>Create class Tracker supporting add_shark, update_location, get_info.</li>
+    <li>Click <em>Run Unit Tests</em>. If all tests pass, you'll get the flag.</li>
+  </ol>
+</div>
+
+<textarea id="editor">
+class Shark:
+    def __init__(self, shark_id, name, location):
+        # Your code here
+        pass
+
+class Tracker:
+    def __init__(self):
+        # Your code here
+        pass
+    def add_shark(self, shark):
+        # Your code here
+        pass
+    def update_location(self, shark_id, location):
+        # Your code here
+        pass
+    def get_info(self, shark_id):
+        # Your code here
+        return (None, None)
+
+# Test runner do not edit below
+run_selected_test()
+</textarea>
+
+<button onclick="runCode()">Run Unit Tests</button>
+
+<textarea id="output">Output or flag will appear here...</textarea>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.22.1/full/pyodide.js"></script>
+<script>
+  async function runCode() {
+    const editor = document.getElementById("editor").value;
+    const output = document.getElementById("output");
+    if (editor.includes("import os") || editor.includes("import shutil")) {
+      output.innerHTML = "ERROR: Usage of 'import os' and 'import shutil' are not allowed";
+      return;
+    }
+    output.innerHTML = "Running...";
+    try {
+      const pyodide = await loadPyodide();
+      // Preload tests
+      pyodide.runPython(`
+import sys, unittest
+from io import StringIO
+from unittest.mock import patch
+
+# Capture prints
+sys.stdout = StringIO()
+sys.stderr = StringIO()
+
+class CustomTestResult(unittest.TextTestResult):
+    def addSuccess(self, test):
+        pass
+
+
+
+def run_selected_test():
+
+    class TestMultiShark(unittest.TestCase):
+        def test_add_and_update(self):
+            tracker = Tracker()
+            shark = Shark(1, "Jaws", "0,0")
+            tracker.add_shark(shark)
+            tracker.update_location(1, "5,5")
+            self.assertEqual(tracker.get_info(1), ("Jaws", "5,5"))
+
+
+    suite = unittest.TestSuite()
+    suite.addTest(TestMultiShark("test_add_and_update"))
+    success_message = "Correct the flag is: Jaws{adv04_multi_shark}"
+    runner = unittest.TextTestRunner(resultclass=CustomTestResult)
+    result = runner.run(suite)
+    if result.wasSuccessful():
+        print(success_message)
+`);
+      // Run user code
+      pyodide.runPython(editor);
+      // Show output
+      const stdout = pyodide.runPython("sys.stdout.getvalue()");
+      const stderr = pyodide.runPython("sys.stderr.getvalue()");
+      output.innerHTML = stdout || stderr || "No output.";
+    } catch (error) {
+      output.innerHTML = "Error: " + error;
+    }
+  }
+</script>
+
+</body>
+</html>

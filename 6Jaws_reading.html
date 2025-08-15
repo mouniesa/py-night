@@ -1,0 +1,106 @@
+Challenge: Quint keeps his shark tracking notes in a secret log file.
+Read the file to find his codeword.
+<p>
+Task:
+<ol>
+    <li>Open and read 'captains_log.txt'.</li>
+    <li>Find the codeword inside.</li>
+    <li>write a script that prints the codeword exactly as written.</li>
+    <li>If correct, you'll see the passphrase. Submit that passphrase.</li>
+</ol>
+</p>
+Note:
+The file 'captains_log.txt' will be in the same folder as this script.
+<textarea id="editor" style="width:100%;height:200px;background-color: black; color: lime;">
+def read_secret():
+    # Your code here
+    print(secret)
+
+# Test case don't type below this
+run_selected_test()
+</textarea>
+
+<button onclick="runCode()" style="margin-top:10px;">Run Unit Tests</button>
+
+<textarea id="output" style="width:100%;height:150px;border:1px solid #ccc;overflow-y:auto;padding:10px;margin-top:10px;background-color: black; color: lime;">
+    Output or flag will appear here...
+</textarea>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.22.1/full/pyodide.js"></script>
+<script>
+    async function runCode() {
+        const editor = document.getElementById("editor").value;
+        const output = document.getElementById("output");
+        if (editor.includes("import os") || editor.includes("import shutil")) {
+            output.innerHTML = "ERROR: Usage of 'import os' and 'import shutil' are not allowed";
+            return;
+        }
+
+        output.innerHTML = "Running...";
+
+        try {
+            // Load Pyodide and initialize it
+            const pyodide = await loadPyodide();
+
+            // Preload the test infrastructure
+            pyodide.runPython(`
+import unittest
+from unittest.mock import patch
+from io import StringIO
+import sys
+
+sys.stdout = StringIO()
+sys.stderr = StringIO()
+
+def run_selected_test():
+    class TestPyNight(unittest.TestCase):
+        @patch('sys.stdout', new_callable=StringIO)
+        def test_read_secret(self, mock_stdout):
+            """Test read_secret()"""
+
+            # Mock file content
+            text_content = """Spotted"""
+            mock_text_file = StringIO(text_content)
+
+            with patch("builtins.open", return_value=mock_text_file):
+                read_secret()
+            self.assertEqual(mock_stdout.getvalue().strip(), "Spotted")
+
+            # Reset mock_stdout for the next test
+            mock_stdout.truncate(0)
+            mock_stdout.seek(0)
+
+            text_content = """Shark"""
+            mock_text_file = StringIO(text_content)
+
+            with patch("builtins.open", return_value=mock_text_file):
+                read_secret()
+            self.assertEqual(mock_stdout.getvalue().strip(), "Shark")
+
+    # Run the tests
+    suite = unittest.TestSuite()
+    suite.addTest(TestPyNight("test_read_secret"))
+    success_message = "Correct the flag is: JAWS{captains_log_shark_spotted_success}"
+    runner = unittest.TextTestRunner(resultclass=CustomTestResult)
+    result = runner.run(suite)
+    if result.wasSuccessful():
+        print(success_message)
+class CustomTestResult(unittest.TextTestResult):
+    def addSuccess(self, test):
+        pass
+`);
+
+            // Execute the user's Python code
+            pyodide.runPython(editor);
+
+            // Retrieve the results
+            const stdout = pyodide.runPython("sys.stdout.getvalue()");
+            const stderr = pyodide.runPython("sys.stderr.getvalue()");
+
+            // Display results
+            output.innerHTML = stdout || stderr || "No output.";
+        } catch (error) {
+            output.innerHTML = `Error: ${error}`;
+        }
+    }
+</script>
